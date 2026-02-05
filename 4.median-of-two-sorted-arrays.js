@@ -1,3 +1,5 @@
+// 2026-02-06 - 2h and gave up with half cases passing
+
 /*
  * @lc app=leetcode id=4 lang=javascript
  *
