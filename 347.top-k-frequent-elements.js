@@ -1,4 +1,5 @@
 // 2026-02-11 - 47min
+// 2026-02-11 - 7min
 /*
  * @lc app=leetcode id=347 lang=javascript
  *
@@ -12,47 +13,23 @@
  * @return {number[]}
  */
 var topKFrequent = function (nums, k) {
-	let map = {};
-	let largestElements = Array.from({ length: k }, () => ({
-		value: undefined,
-		frequency: -1,
-	}));
+	let map = new Map();
 
 	for (let num of nums) {
-		if (map[num]) {
-			map[num].frequency++;
-		} else {
-			map[num] = {
-				frequency: 1,
-			};
-		}
-
-		for (let largestElementIndex in largestElements) {
-			let largestElement = largestElements[largestElementIndex];
-			if (largestElement.value == num) {
-				largestElements[largestElementIndex].frequency++;
-				break;
-			} else if (largestElement.frequency < map[num].frequency) {
-				if (map[num].position != undefined) {
-					largestElements[map[num].position] =
-						largestElements[largestElementIndex];
-				}
-
-				if (largestElements[largestElementIndex].value != undefined)
-					map[largestElements[largestElementIndex].value].position =
-						map[num].position;
-
-				largestElements[largestElementIndex] = {
-					frequency: map[num].frequency,
-					value: num,
-				};
-				map[num].position = largestElementIndex;
-
-				break;
-			}
-		}
+		map.set(num, (map.get(num) ?? 0) + 1);
 	}
 
-	return Array.from({ length: k }, (_, i) => largestElements[i].value);
+	let buckets = Array.from({ length: nums.length + 1 }, () => []);
+
+	for (let [num, freq] of map) {
+		buckets[freq].push(num);
+	}
+
+	let results = [];
+	for (let i = buckets.length - 1; i >= 0 && results.length < k; i--) {
+		results.push(...buckets[i]);
+	}
+
+	return results.splice(0, k);
 };
 // @lc code=end
