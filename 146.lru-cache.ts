@@ -24,6 +24,34 @@ class LRUCache {
 	constructor(capacity: number) {
 		this.capacity = capacity;
 		this.keyMap = new Map();
+
+		this.dllHead = { value: 0, key: 0, next: undefined, prev: undefined };
+		this.dllTail = { value: 0, key: 0, next: undefined, prev: undefined };
+		this.dllHead.prev = this.dllTail;
+		this.dllTail.next = this.dllHead;
+	}
+
+	removeFromDLL(key: number) {
+		let node = this.keyMap.get(key)!;
+
+		node.prev!.next = node.next;
+		node.next!.prev = node.prev;
+
+		this.keyMap.delete(key);
+	}
+
+	putIntoDLL(key: number, value: number) {
+		let newNode = {
+			key,
+			value,
+			prev: this.dllHead.prev,
+			next: this.dllHead,
+		};
+
+		this.dllHead.prev!.next = newNode;
+		this.dllHead.prev = newNode;
+
+		this.keyMap.set(key, newNode);
 	}
 
 	get(key: number): number {
@@ -31,76 +59,29 @@ class LRUCache {
 
 		let node = this.keyMap.get(key)!;
 
-		if (node.next != undefined) {
-			if (node.prev) {
-				node.prev.next = node.next;
-				node.next.prev = node.prev;
-			} else {
-				this.dllTail = node.next;
-				node.next.prev = undefined;
-			}
-			node.prev = this.dllHead;
-			this.dllHead.next = node;
-			node.next = undefined;
-		} else {
-		}
-
-		this.dllHead = node;
+		this.removeFromDLL(key);
+		this.putIntoDLL(key, node.value);
 
 		return node.value;
 	}
 
 	put(key: number, value: number): void {
 		if (this.keyMap.has(key)) {
-			let node = this.keyMap.get(key)!;
-			node.value = value;
-
-			if (node.next != undefined) {
-				if (node.prev) {
-					node.prev.next = node.next;
-					node.next.prev = node.prev;
-				} else {
-					this.dllTail = node.next;
-					node.next.prev = undefined;
-				}
-				node.prev = this.dllHead;
-				this.dllHead.next = node;
-				node.next = undefined;
-			}
-
-			this.dllHead = node;
-		} else {
-			if (this.keyMap.size + 1 > this.capacity) {
-				let toRemove = this.dllTail;
-				this.keyMap.delete(toRemove.key);
-
-				if (this.capacity != 1) {
-					toRemove.next!.prev = undefined;
-					this.dllTail = toRemove.next!;
-				}
-			}
-
-			let newNode = {
-				prev: this.dllHead,
-				next: undefined,
-				value,
-				key,
-			};
-
-			if (this.dllHead) this.dllHead.next = newNode;
-
-			if (this.keyMap.size == 0) this.dllTail = newNode;
-			this.dllHead = newNode;
-
-			this.keyMap.set(key, newNode);
+			this.removeFromDLL(key);
 		}
+
+		if (this.keyMap.size + 1 > this.capacity) {
+			this.removeFromDLL(this.dllTail.next!.key);
+		}
+
+		this.putIntoDLL(key, value);
 	}
 }
 
 function printDll(tail: DLLNode) {
 	let currentNode: DLLNode | undefined = tail;
 	while (currentNode) {
-		console.log(currentNode.prev?.value, currentNode.value, currentNode.next?.value);
+		console.log(currentNode.prev?.key, currentNode.key, currentNode.next?.key);
 		currentNode = currentNode.next;
 	}
 }
