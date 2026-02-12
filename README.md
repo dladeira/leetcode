@@ -11,4 +11,5 @@ I really recommend the LeetCode extension on VSC
 ### What I need to focus on
 
 -   Handling base case (for example if array len == 1, sometimes just return array)
+-   Edge cases
 -   Default values (don't set it to -1000, set it to array[0])
